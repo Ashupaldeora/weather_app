@@ -7,8 +7,15 @@ ThemeData darkTheme = ThemeData(
       secondary: Color(0xff151748),
       tertiary: Color(0xff1D2162),
       secondaryContainer: Color(0xff0E0E30),
+
+      // inversePrimary: Colors.grey.shade800
     ),
     textTheme: TextTheme(
+        displaySmall: GoogleFonts.poppins(
+            textStyle: TextStyle(
+                color: Colors.grey.shade800,
+                fontSize: 13,
+                fontWeight: FontWeight.w500)),
         titleMedium: GoogleFonts.poppins(
             textStyle: TextStyle(
                 color: Colors.white,
@@ -48,7 +55,4 @@ ThemeData darkTheme = ThemeData(
                 fontSize: 28,
                 fontWeight: FontWeight.w600)),
         headlineMedium: GoogleFonts.poppins(
-            textStyle: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w600))));
+            textStyle: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w600))));

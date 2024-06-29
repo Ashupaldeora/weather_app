@@ -1,16 +1,29 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:weather_app/controller/weather_provider.dart';
 import 'package:weather_app/theme/theme_provider.dart';
+import 'package:weather_app/view/search/search_screen.dart';
 
 class HomeScreen extends StatelessWidget {
+  void _setSystemUIOverlayStyle(BuildContext context) {
+    final isDark = Provider.of<ThemeProvider>(context, listen: false).isDark;
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      systemNavigationBarColor: isDark ? Color(0xff151748) : Colors.white,
+      systemNavigationBarIconBrightness:
+          isDark ? Brightness.light : Brightness.dark,
+    ));
+  }
+
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final providerTrue = Provider.of<WeatherProvider>(context);
     final providerFalse = Provider.of<WeatherProvider>(context, listen: false);
+    Future.microtask(() => _setSystemUIOverlayStyle(context));
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -43,7 +56,9 @@ class HomeScreen extends StatelessWidget {
                         ),
                         leading: IconButton(
                           icon: Icon(
-                            Icons.light_mode,
+                            Provider.of<ThemeProvider>(context).isDark
+                                ? Icons.dark_mode
+                                : Icons.light_mode,
                             color: Colors.white,
                           ),
                           onPressed: () {
@@ -57,7 +72,13 @@ class HomeScreen extends StatelessWidget {
                               Icons.search,
                               color: Colors.white,
                             ),
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => SearchScreen(),
+                                  ));
+                            },
                           ),
                         ],
                       ),
@@ -108,101 +129,124 @@ class HomeScreen extends StatelessWidget {
                           ),
                           Expanded(
                               child: ListView.builder(
-                            itemCount: providerTrue
-                                .dataModel.forecast!.forecastDay.length,
-                            itemBuilder: (context, index) => Container(
-                              margin: EdgeInsets.only(
-                                  bottom: 15, left: 15, right: 15),
-                              height: 90,
-                              decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .secondaryContainer,
-                                  boxShadow: [
-                                    BoxShadow(
-                                        color: Colors.black12.withOpacity(0.07),
-                                        blurRadius: 50,
-                                        spreadRadius: -5)
-                                  ],
-                                  // color: Colors.yellow,
-                                  borderRadius: BorderRadius.circular(15)),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        providerTrue.dataModel.forecast!
-                                            .forecastDay[index].formattedDate,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelMedium,
+                                  itemCount: providerTrue
+                                      .dataModel.forecast!.forecastDay.length,
+                                  itemBuilder: (context, index) {
+                                    String image =
+                                        providerFalse.giveForecastImage(index);
+                                    return Container(
+                                      margin: EdgeInsets.only(
+                                          bottom: 15, left: 15, right: 15),
+                                      height: 90,
+                                      decoration: BoxDecoration(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .secondaryContainer,
+                                          boxShadow: [
+                                            BoxShadow(
+                                                color: Colors.black12
+                                                    .withOpacity(0.07),
+                                                blurRadius: 50,
+                                                spreadRadius: -5)
+                                          ],
+                                          // color: Colors.yellow,
+                                          borderRadius:
+                                              BorderRadius.circular(15)),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                providerTrue
+                                                    .dataModel
+                                                    .forecast!
+                                                    .forecastDay[index]
+                                                    .formattedDate,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .labelMedium,
+                                              ),
+                                              Text(
+                                                providerTrue
+                                                    .dataModel
+                                                    .forecast!
+                                                    .forecastDay[index]
+                                                    .dayOfWeek,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .labelMedium,
+                                              ),
+                                            ],
+                                          ),
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                providerTrue
+                                                    .dataModel
+                                                    .forecast!
+                                                    .forecastDay[index]
+                                                    .day
+                                                    .minTempC
+                                                    .toString(),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .labelLarge,
+                                              ),
+                                              Text("0 /"),
+                                              Text(
+                                                providerTrue
+                                                    .dataModel
+                                                    .forecast!
+                                                    .forecastDay[index]
+                                                    .day
+                                                    .maxTempC
+                                                    .toString(),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleSmall,
+                                              ),
+                                              Text("0"),
+                                            ],
+                                          ),
+                                          Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Image.asset(
+                                                image,
+                                                height: 30,
+                                              ),
+                                              SizedBox(
+                                                width: 70,
+                                                child: Text(
+                                                  textAlign: TextAlign.center,
+                                                  overflow:
+                                                      TextOverflow.visible,
+                                                  providerTrue
+                                                      .dataModel
+                                                      .forecast!
+                                                      .forecastDay[index]
+                                                      .day
+                                                      .conditionText,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .titleMedium,
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        ],
                                       ),
-                                      Text(
-                                        providerTrue.dataModel.forecast!
-                                            .forecastDay[index].dayOfWeek,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelMedium,
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        providerTrue.dataModel.forecast!
-                                            .forecastDay[index].day.minTempC
-                                            .toString(),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelLarge,
-                                      ),
-                                      Text("0 /"),
-                                      Text(
-                                        providerTrue.dataModel.forecast!
-                                            .forecastDay[index].day.maxTempC
-                                            .toString(),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleSmall,
-                                      ),
-                                      Text("0"),
-                                    ],
-                                  ),
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Image.asset(
-                                        "assets/images/cloudy.png",
-                                        height: 30,
-                                      ),
-                                      SizedBox(
-                                        width: 70,
-                                        child: Text(
-                                          textAlign: TextAlign.center,
-                                          overflow: TextOverflow.visible,
-                                          providerTrue
-                                              .dataModel
-                                              .forecast!
-                                              .forecastDay[index]
-                                              .day
-                                              .conditionText,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium,
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ),
-                          ))
+                                    );
+                                  }))
                         ],
                       ),
                     ),
@@ -294,7 +338,7 @@ class HomeScreen extends StatelessWidget {
                       top: 190,
                       left: 50,
                       child: Image.asset(
-                        "assets/images/cloudy.png",
+                        providerTrue.image,
                         height: 150,
                       )),
                 ],
