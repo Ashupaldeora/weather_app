@@ -9,6 +9,7 @@ class WeatherProvider extends ChangeNotifier {
   Future<void> loadData(String query) async {
     dataModel =
         DataModel.fromJson(await ApiServices.apiServices.fetchData(query));
+    notifyListeners();
   }
 
   WeatherProvider() {

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:weather_app/controller/weather_provider.dart';
+import 'package:weather_app/theme/theme_provider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -11,21 +12,23 @@ class HomeScreen extends StatelessWidget {
     final providerTrue = Provider.of<WeatherProvider>(context);
     final providerFalse = Provider.of<WeatherProvider>(context, listen: false);
     return Scaffold(
-      body: providerTrue.dataModel.location == null
-          ? Center(
-              child: CircularProgressIndicator(),
-            )
-          : Container(
-              decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                    Color(0xff83B1FB),
-                    Color(0xff5B95F6),
-                    Color(0xff5B95F6),
-                  ])),
-              child: Stack(
+      body: Container(
+        decoration: BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+              Theme.of(context).colorScheme.secondary,
+              Theme.of(context).colorScheme.primary,
+              Theme.of(context).colorScheme.primary
+            ])),
+        child: providerTrue.dataModel.location == null
+            ? Center(
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                ),
+              )
+            : Stack(
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,10 +43,13 @@ class HomeScreen extends StatelessWidget {
                         ),
                         leading: IconButton(
                           icon: Icon(
-                            Icons.widgets_outlined,
+                            Icons.light_mode,
                             color: Colors.white,
                           ),
-                          onPressed: () {},
+                          onPressed: () {
+                            Provider.of<ThemeProvider>(context, listen: false)
+                                .toggleTheme();
+                          },
                         ),
                         actions: [
                           IconButton(
@@ -68,7 +74,7 @@ class HomeScreen extends StatelessWidget {
                               height: 5,
                             ),
                             Text(
-                              providerTrue.dataModel.localTime.toString(),
+                              "${providerTrue.dataModel.region}, ${providerTrue.dataModel.country}",
                               style: Theme.of(context).textTheme.headlineSmall,
                             ),
                           ],
@@ -82,36 +88,122 @@ class HomeScreen extends StatelessWidget {
                       height: 550,
                       width: double.infinity,
                       decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.tertiary,
                           borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(100),
                               topRight: Radius.circular(100))),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              height: 180,
-                            ),
-                            Text(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            height: 180,
+                          ),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 15.0),
+                            child: Text(
                               "5 day forecast",
-                              style:
-                                  TextStyle(color: Colors.black, fontSize: 10),
+                              style: Theme.of(context).textTheme.displayMedium,
                             ),
-                            Expanded(
-                                child: ListView.builder(
-                              itemCount: 5,
-                              itemBuilder: (context, index) => Container(
-                                margin: EdgeInsets.only(bottom: 10),
-                                height: 100,
-                                decoration: BoxDecoration(
-                                    color: Colors.yellow,
-                                    borderRadius: BorderRadius.circular(15)),
+                          ),
+                          Expanded(
+                              child: ListView.builder(
+                            itemCount: providerTrue
+                                .dataModel.forecast!.forecastDay.length,
+                            itemBuilder: (context, index) => Container(
+                              margin: EdgeInsets.only(
+                                  bottom: 15, left: 15, right: 15),
+                              height: 90,
+                              decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .secondaryContainer,
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: Colors.black12.withOpacity(0.07),
+                                        blurRadius: 50,
+                                        spreadRadius: -5)
+                                  ],
+                                  // color: Colors.yellow,
+                                  borderRadius: BorderRadius.circular(15)),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        providerTrue.dataModel.forecast!
+                                            .forecastDay[index].formattedDate,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelMedium,
+                                      ),
+                                      Text(
+                                        providerTrue.dataModel.forecast!
+                                            .forecastDay[index].dayOfWeek,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelMedium,
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        providerTrue.dataModel.forecast!
+                                            .forecastDay[index].day.minTempC
+                                            .toString(),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelLarge,
+                                      ),
+                                      Text("0 /"),
+                                      Text(
+                                        providerTrue.dataModel.forecast!
+                                            .forecastDay[index].day.maxTempC
+                                            .toString(),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall,
+                                      ),
+                                      Text("0"),
+                                    ],
+                                  ),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Image.asset(
+                                        "assets/images/cloudy.png",
+                                        height: 30,
+                                      ),
+                                      SizedBox(
+                                        width: 70,
+                                        child: Text(
+                                          textAlign: TextAlign.center,
+                                          overflow: TextOverflow.visible,
+                                          providerTrue
+                                              .dataModel
+                                              .forecast!
+                                              .forecastDay[index]
+                                              .day
+                                              .conditionText,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                ],
                               ),
-                            ))
-                          ],
-                        ),
+                            ),
+                          ))
+                        ],
                       ),
                     ),
                   ),
@@ -145,11 +237,17 @@ class HomeScreen extends StatelessWidget {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  Text(
-                                    providerTrue.dataModel.condition.toString(),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineMedium,
+                                  SizedBox(
+                                    width: 170,
+                                    child: Text(
+                                      textAlign: TextAlign.center,
+                                      overflow: TextOverflow.visible,
+                                      providerTrue.dataModel.condition
+                                          .toString(),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineMedium,
+                                    ),
                                   )
                                 ],
                               ),
@@ -201,7 +299,7 @@ class HomeScreen extends StatelessWidget {
                       )),
                 ],
               ),
-            ),
+      ),
     );
   }
 }
